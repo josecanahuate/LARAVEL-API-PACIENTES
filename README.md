@@ -1,66 +1,367 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+   ************************ API REST PACIENTES **************************
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
 
-## About Laravel
+** Crear y Configurar La bd
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+*** Generar las Migraciones para la tabla 'pacientes'
+	
+	php artisan make:migration create_pacientes_table
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+*** en la tabla 'pacientes' le asignamos los campos que llevaran. al terminar de asignarlos debemos migrar.
 
-## Learning Laravel
+** php artisan migrate -> Ejecutar todas las migraciones
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+*** Para Migrar solo 1 Migracion:	
+php artisan migrate --path=database/migrations/2024_04_09_185454_create_pacientes_table
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+*** IMPORTANTE: los campos de numeros si son se usaran para calcular algo es recomendado definirlos como 'string'.
 
-## Laravel Sponsors
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+*************************************** API REST - SEEDER (Registros de Prueba)
 
-### Premium Partners
+	php artisan make:seeder PacienteSeeder
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
 
-## Contributing
+importar use Illuminate\Support\Facades\DB;
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+al terminar de crear los registros falsos, ejecutamos php artisan db:seed
 
-## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+************************************* CREAR CONTROLADOR Y MODELO PACIENTE
+	
+Modelo:
+	php artisan make:model Paciente
 
-## License
+Controlador: dentro de Carpeta API y el controlador debe tener una estructura de API.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+	php artisan make:controller API/PacienteController --api
+
+
+***** PARA ELIMINAR UN CONTROLADOR NO DESEADO
+
+SI NO HEMOS MIGRADO, PODEMOS ELIMINARLO MANUALMENTE, PERO SI HEMOS MIGRADO, DEBEMOS HACER ROLLBACK, Y VOLVER A CREARLO Y VOLVER A MIGRARLO.
+
+
+
+*********************************** ASIGNACION MASIVA MODELO PACIENTE
+    protected $fillable = [
+        'nombres',
+        'apellidos',
+        'edad',
+        'sexo',
+        'dni',
+        'tipo_sangre',
+        'telefono',
+        'correo',
+        'direccion'
+    ];
+
+    //para no mostrar estos campos
+    protected $hidden = [
+        'created_at', 
+        'updated_at'
+    ];
+
+
+***************************************** REVERTIR MIGRACION
+
+CADA VEZ QUE SE HAGAN CAMBIOS EN LAS MIGRACIONES O TABLAS SE DEBEN REALIZAR LOS CAMBIOS.
+
+Revierte Migracion todas las Tablas ->	php artisan migrate:refresh --seed
+
+---Revierte Migracion SOLO 1 Tabla: 
+php artisan migrate:refresh --path=database\migrations\2024_04_09_185454_create_pacientes_table.php --seed
+
+
+
+
+***************************************** GUARDAR REGISTROS
+
+***** CREAR UN REQUEST DE VALIDACIONES
+
+	php artisan make:request GuardarPacienteRequest
+
+-Crear las validaciones
+-Importar metodo request en el metodo store
+
+
+
+***************************************** Mostrar un Registro
+
+para devolver un solo registro hacemos uso del metodo show y del modelo Paciente y la variable $paciente, la cual es lo mismo que $id. y se la pasamos a la ruta {paciente}
+
+
+
+***************************************** ACTUALIZAR REGISTROS
+
+** CREAR NUEVO ARCHIVO DE VALIDACION PARA ACTUALIZAR ActualizarPacienteRequest
+
+	php artisan make:request ActualizarPacienteRequest
+
+Para Actualizar por Postman: metodo put, habilitamos el header accept, json
+y en el body le pasamos todos los parametros de un usuario especifico y tambien el id, y modificamos el body json y send. en la url debemos pasarle el id.
+
+http://localhost:8000/api/pacientes/11
+
+
+CUANDO UN CAMPO ESTE MARCADO COMO UNICO, SE DEBE PASAR PARAMETROS EXTRAS EN EL METODO 'UPDATE', EL CUAL NOS PERMITA INGRESAR EL MISMO CAMPO QUE ESTA DEFINIDO COMO UNICO.
+
+"dni" => ["required", "unique:pacientes,dni," .$this->route('paciente')->id,],
+
+
+
+***************************************** ELIMINAR REGISTROS
+
+Para Actualizar por Postman: metodo delete, habilitamos el header accept, json
+y en el body le pasamos todos los parametros de un usuario especifico y tambien el id, y modificamos el body json y send. en la url debemos pasarle el id.
+
+http://localhost:8000/api/pacientes/10
+
+"msg": "Paciente Eliminado correctamente"
+
+
+
+
+***************************************** RESOURCES - TRANSFORMA LA RESPUESTA
+https://laravel.com/docs/10.x/eloquent-resources#main-content
+https://laravel.com/docs/10.x/helpers#main-content
+
+Ubicacion: app\Http\Resources\PacienteResource.php
+
+LA FORMA CORRECTA PARA USAR LAS APIS ES USAR EL METODO RESOURCE.
+
+RESOURCES LO USAMOS PARA TRANSFORMAR LA RESPUESTA DEL API. Resource transforma los datos entre el modelo y el json.
+
+Beneficios de resources:
+
+-Podemos devolver unicamente los campos que queramos.
+-Podemos cambiar el formato de la respuesta api.
+-Podemos enviar la informacion en Mayuscula o Minuscula
+-Podemos Cambiar el valor de la propiedad.
+
+
+**MIGRAR CAMBIOS
+php artisan migrate:refresh --path=database\migrations\2024_04_09_185454_create_pacientes_table.php --seed
+
+
+*** CREAR UN RESOURCE - app\Http\Resources\PacienteResource.php
+
+	php artisan make:resource PacienteResource
+
+
+
+
+
+***************************************** Laravel Sanctum - API-TOKENS
+https://laravel.com/docs/10.x/sanctum#main-content
+
+
+1- Instalacion:
+
+	composer require laravel/sanctum
+
+
+2- Publicar y Migrar
+
+	php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+
+
+3- 	php artisan migrate:reset
+
+
+4- Finally, you should run your database migrations.
+
+	php artisan migrate --seed
+
+
+5- Ir a app/Http/Kernel.php
+
+pegar esta linea en 'api'
+
+\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+
+
+6- Crear Controlador para tener los metodos y los apitokens
+
+	php artisan make:controller AutenticarController
+
+6.1 Crearemos 3 metodos:
+
+	- Registrar usuario (register)
+	- Login de usuario (log in)
+	- Salir de sesion (log out)
+
+----------------------------------- METODO RegistrO
+
+6.2 - Crear un Request de validacion para el metodo registro
+
+	php artisan make:request RegistroRequest
+
+6.3 Importar Request en metodo registro()
+
+6.4 - Creando Usuario con Postman - Metodo Post
+
+- http://localhost:8000/api/registro
+
+- Configurar Header
+Accept - application/json
+
+-Body + Send
+{
+    "name" : "Juan",
+    "email": "juan2021@gmail.com",
+    "password": "1234"
+}
+
+"Usuario registrado correctamente"
+
+7 ----------------------------------- METODO LOGIN
+
+7.2 - Crear un Request de validacion para el metodo login
+
+	php artisan make:request AccesoRequest
+
+
+7.3 Importar Request en metodo login()
+& Importar: 
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+
+7.4- Crear la logica para crear el token
+
+7.5- Crear la ruta en api.php
+
+
+7.6 - Logeando Usuario con Postman - Metodo POST
+
+- http://localhost:8000/api/login
+
+- Configurar Header
+Accept - application/json
+Accept-Encoding - Accept-Encoding
+
+
+-Body + Send
+{
+    "email": "juan2021@gmail.com",
+    "password": "1234"
+}
+
+Respuesta: 
+{
+    "res ": true,
+    "token": "1|oiqyUDgmTFh1aK8APTJe6MD7vvtdhGhEJxjITPYP95735dd4",
+    "msg": "Autenticación exitosa"
+}
+
+
+-------------- AHORA PARA HACER LOGIN
+
+
+
+
+8 ----------------------------------- METODO LOGOUT
+
+1- http://localhost:8000/api/logout
+
+2- envolvemos la ruta logout en un middleware
+
+3- Pasamos el token que se genero al iniciar sesion en el Authorization, seleccionamos Bearer Token y en el campo del lado, pegamos el token.
+
+
+***** AHORA PARA VER TODOS LOS PACIENTES O PARA ACCEDER A LA RUTAS DE PACIENTES DEBEMOS PASAR EL TOKEN GENERADO AL INICIAR SESION DEBEMOS PASARLO EN POSTMAN EN Authorization - Bearer TOken y pegamos el Token generado y ya podemos hacer SEND y nos mostrara los pacientes o podemos acceder a todas las rutas de pacientes.
+
+EN TODOS LOS METODOS DEBEMOS AGREGAR EL TOKEN
+- Crear paciente
+- Ver pacientes
+- Ver 1 paciente
+- Actualizar Paciente
+- Eliminar Paciente
+
+
+
+
+
+
+
+***************************************** Test API REST
+
+LIMPIAR BASE DE DATOS:
+
+	php artisan migrate:reset
+	
+	php artisan migrate --seed
+
+
+
+
+
+
+*************************************  Tablas Relacionadas
+
+Crearemos una relacion de muchos a muchos, entre Usuarios y Roles. 
+Para esto crearemos una tabla intermedio (pivot) role_user
+
+Users            Roles
+  |                |
+  |                |                   		
+  |   role_user    |
+  |                |
+  |                |
+    roles_asignados
+
+
+--Relacion Muchos a Muchos:
+https://laravel.com/docs/8.x/eloquent-relationships#updating-many-to-many-relationships
+
+
+-- MIgraciones 
+https://laravel.com/docs/4.2/migrations
+
+
+
+1- Crear Tabla Roles con su migracion
+
+php artisan make:model Role -m
+
+
+2- Crear tabla pivot intermedia 
+
+	php artisan make:migration create_roles_asignados_table --	create=roles_asignados
+
+
+3- Crear campos en cada tabla
+
+
+4- Migrar CAMBIOS
+
+	php artisan migrate:refresh --seed
+
+
+
+5- 
+
+
+Insertando Usuario nuevo con rol EN POSTMAN - CREANDO NUEVO REGISTRO USUARIO
+
+{
+    "name" : "Maicol",
+    "email": "maicol05@gmail.com",
+    "password": "1234",
+    "roles": [
+        "1",
+        "2"
+    ]
+}
+
+
+
+******************************** RETORNAR DATA RELACIONADA
+
+en el metodo login, usamos el parametro with('roles') para mostrar los roles que tiene este usuario, desde postman, debemos logearnos.
+
+$user = User::with('roles')->where('email', $request->email)->first();
